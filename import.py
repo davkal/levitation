@@ -22,7 +22,7 @@ from optparse import OptionParser
 # The encoding for input, output and internal representation. Leave alone.
 ENCODING = 'UTF-8'
 # The XML namespace we support.
-XMLNS = 'http://www.mediawiki.org/xml/export-0.4/'
+XMLNS = 'http://www.mediawiki.org/xml/export-0.5/'
 
 
 def tzoffset():
@@ -200,6 +200,8 @@ class Revision:
 		if self.comment:
 			self.meta['comm'].write(self.id, self.comment.encode(ENCODING))
 		mydata = self.text.encode(ENCODING)
+		if self.meta['options'].BY_WORD:
+			mydata = mydata.replace(' ', '\n')
 		out('blob\nmark :%d\ndata %d\n' % (self.id + 1, len(mydata)))
 		out(mydata + '\n')
 
@@ -535,6 +537,9 @@ class LevitationImport:
 		parser.add_option("-P", "--pagefile", dest="PAGEFILE", metavar="PAGE",
 				help="File for storing page information (257 bytes/page) (default: .import-page)",
 				default=".import-page")
+		parser.add_option("-b", "--blame-by-word", dest="BY_WORD",
+				help="Commits each word on its own line to allow word-by-word blaming.",
+				default=False)
 		parser.add_option("--no-lxml", dest="NOLXML",
 				help="Do not use the lxml parser, even if it is available", action="store_true",
 				default=False)
